@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: parapreceptor
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://main-server-vim3.onrender.com
+
+

@@ -56,9 +56,23 @@ try {
     # 1. Limpeza inicial
     Clear-OrphanedProcesses
 
-    # 2. Localiza o Main-Server
+    # 2. Localiza o Main-Server (suporta pastas MainServer e Main-Server)
     if (-not $ServerPath) {
-        $ServerPath = Join-Path (Split-Path $PSScriptRoot -Parent) "Main-Server"
+        $parentDir = Split-Path $PSScriptRoot -Parent
+        $candidates = @(
+            (Join-Path $parentDir "MainServer"),
+            (Join-Path $parentDir "Main-Server"),
+            (Join-Path $parentDir "_SERVER\Main-Server")
+        )
+        foreach ($cand in $candidates) {
+            if (Test-Path (Join-Path $cand "run_dev.ps1")) {
+                $ServerPath = (Resolve-Path $cand).Path
+                break
+            }
+        }
+        if (-not $ServerPath) {
+            $ServerPath = Join-Path $parentDir "MainServer"
+        }
     }
     $serverScript = Join-Path $ServerPath "run_dev.ps1"
 
@@ -92,7 +106,7 @@ try {
         # run_dev.ps1 do Main-Server é UTF-8 sem BOM; o pwsh 7 preserva os acentos.
         $psExe = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
         $serverProcess = Start-Process -FilePath $psExe `
-            -ArgumentList "-ExecutionPolicy", "Bypass", "-File", "run_dev.ps1", "-Port", $ServerPort `
+            -ArgumentList "-ExecutionPolicy", "Bypass", "-File", "run_dev.ps1", "-Port", $ServerPort, "-LocalMode" `
             -WorkingDirectory $ServerPath -NoNewWindow -PassThru
         $serverProcess.Id | Out-File -FilePath "$PSScriptRoot\.server.pid" -Encoding ascii
         $processes += $serverProcess

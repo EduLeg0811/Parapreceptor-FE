@@ -318,7 +318,14 @@ export async function listLexicalBooksApp(): Promise<{
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/lexical/sources"), { method: "GET", cache: "no-store" });
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/lexical/sources"), { method: "GET", cache: "no-store" });
+  if (data?.result?.books) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      books: data?.sources || data?.books || [],
+    },
+  };
 }
 
 export async function searchLexicalBookApp(payload: {
@@ -343,12 +350,22 @@ export async function searchLexicalBookApp(payload: {
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/lexical/search"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/lexical/search"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (data?.result) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      book: data?.book || payload.book,
+      term: data?.term || payload.term,
+      total: Number(data?.totalFound ?? data?.total ?? data?.results?.length ?? 0),
+      matches: data?.results || data?.matches || [],
+    },
+  };
 }
 
 export async function searchLexicalOverviewApp(payload: {
@@ -381,12 +398,23 @@ export async function searchLexicalOverviewApp(payload: {
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/lexical/overview"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/lexical/overview"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (data?.result) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      term: data?.term || payload.term,
+      limit: Number(data?.limit ?? payload.limit ?? 50),
+      totalBooks: Number(data?.totalBooks ?? data?.groups?.length ?? 0),
+      totalFound: Number(data?.totalFound ?? 0),
+      groups: data?.groups || [],
+    },
+  };
 }
 
 export async function exportLexicalOverviewDocxApp(payload: {
@@ -437,12 +465,21 @@ export async function lookupLexicalCitationsApp(payload: {
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/lexical/citations/lookup"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/lexical/citations/lookup"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (data?.result) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      paragraphsCount: Number(data?.paragraphsCount ?? 0),
+      total: Number(data?.total ?? data?.results?.length ?? 0),
+      results: data?.results || [],
+    },
+  };
 }
 
 export async function searchVerbeteApp(payload: {
@@ -471,12 +508,29 @@ export async function searchVerbeteApp(payload: {
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/lexical/verbetes/search"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/lexical/verbetes/search"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (data?.result) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      query: {
+        author: payload.author || "",
+        title: payload.title || "",
+        area: payload.area || "",
+        text: payload.text || "",
+      },
+      total: Number(data?.totalFound ?? data?.total ?? data?.results?.length ?? 0),
+      matches: (data?.results || data?.matches || []).map((row: any) => ({
+        ...row,
+        link: row.link || row.data?.link || "",
+      })),
+    },
+  };
 }
 
 export async function semanticSearchPensatasApp(payload: {
@@ -532,12 +586,37 @@ export async function semanticSearchPensatasApp(payload: {
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/semantic/search"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/semantic/search"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (data?.result) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      indexId: data?.indexId || payload.indexId,
+      query: data?.term || payload.query,
+      total: Number(data?.totalFound ?? data?.total ?? data?.results?.length ?? 0),
+      requestedMinScore: payload.minScore ?? null,
+      recommendedMinScore: Number(data?.recommendedMinScore ?? 0),
+      minScore: Number(data?.minScoreUsed ?? data?.minScore ?? data?.recommendedMinScore ?? 0),
+      ignoreBaseCalibration: Boolean(payload.ignoreBaseCalibration),
+      lexicalFilteredCount: Number(data?.lexicalFilteredCount ?? 0),
+      ragLlmLog: data?.ragLlmLog ?? null,
+      ragContext: data?.ragContext ?? {
+        usedRagContext: false,
+        vectorStoreIds: [],
+        keyTerms: [],
+        definitions: [],
+        relatedTerms: [],
+        disambiguatedQuery: "",
+        references: [],
+      },
+      matches: data?.results || data?.matches || [],
+    },
+  };
 }
 
 export async function searchSemanticOverviewApp(payload: {
@@ -599,12 +678,42 @@ export async function searchSemanticOverviewApp(payload: {
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/semantic/overview"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/semantic/overview"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     cache: "no-store",
   });
+  if (data?.result) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      term: data?.term || payload.term,
+      limit: Number(payload.limit ?? 50),
+      minScore: payload.minScore ?? null,
+      recommendedMinScoreMin: Number(data?.recommendedMinScoreMin ?? 0),
+      recommendedMinScoreMax: Number(data?.recommendedMinScoreMax ?? 0),
+      usesCalibratedMinScores: true,
+      ignoreBaseCalibration: Boolean(payload.ignoreBaseCalibration),
+      ragLlmLog: data?.ragLlmLog ?? null,
+      ragContext: data?.ragContext ?? {
+        usedRagContext: false,
+        vectorStoreIds: [],
+        keyTerms: [],
+        definitions: [],
+        relatedTerms: [],
+        disambiguatedQuery: "",
+        references: [],
+      },
+      totalIndexes: Number(data?.totalIndexes ?? data?.groups?.length ?? 0),
+      totalFound: Number(data?.totalFound ?? 0),
+      lexicalFilteredCount: Number(data?.lexicalFilteredCount ?? 0),
+      groups: (data?.groups || []).map((g: any) => ({
+        ...g,
+        matches: g.matches || g.results || [],
+      })),
+    },
+  };
 }
 
 export async function exportSemanticOverviewDocxApp(payload: {
@@ -693,24 +802,36 @@ export interface SemanticOverviewProgressSnapshot {
 }
 
 export async function fetchSemanticSearchProgress(): Promise<{ ok: boolean; result: SemanticOverviewProgressSnapshot }> {
-  return fetchJsonWithRetry(apiUrl("/api/progress/semantic-search"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/progress/semantic-search"), {
     method: "GET",
     cache: "no-store",
   });
+  return {
+    ok: true,
+    result: data?.result || data || { status: "idle", events: [] },
+  };
 }
 
 export async function fetchSemanticOverviewProgress(): Promise<{ ok: boolean; result: SemanticOverviewProgressSnapshot }> {
-  return fetchJsonWithRetry(apiUrl("/api/progress/semantic-overview"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/progress/semantic-overview"), {
     method: "GET",
     cache: "no-store",
   });
+  return {
+    ok: true,
+    result: data?.result || data || { status: "idle", events: [] },
+  };
 }
 
 export async function fetchLexicalOverviewProgress(): Promise<{ ok: boolean; result: SemanticOverviewProgressSnapshot }> {
-  return fetchJsonWithRetry(apiUrl("/api/progress/lexical-overview"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/progress/lexical-overview"), {
     method: "GET",
     cache: "no-store",
   });
+  return {
+    ok: true,
+    result: data?.result || data || { status: "idle", events: [] },
+  };
 }
 
 export async function searchOnlineDictionaryApp(payload: {
@@ -769,8 +890,15 @@ export async function listSemanticIndexesApp(): Promise<{
     }>;
   };
 }> {
-  return fetchJsonWithRetry(apiUrl("/api/semantic/indexes"), {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/semantic/indexes"), {
     method: "GET",
     cache: "no-store",
   });
+  if (data?.result?.indexes) return data;
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: {
+      indexes: data?.indexes || [],
+    },
+  };
 }

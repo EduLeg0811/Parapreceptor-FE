@@ -27,13 +27,15 @@ const reasoningTokensFromUsage = (usage: Record<string, unknown>) => Number((usa
 
 const pricingForModelAndInput = (model: string) => {
   const normalizedModel = model.toLowerCase();
-  const matchedPricingKey = normalizedModel.startsWith("gpt-5.6-luna")
-    ? "gpt-5.6-luna"
-    : normalizedModel.startsWith("gpt-5.6-terra")
-      ? "gpt-5.6-terra"
-      : normalizedModel.startsWith("gpt-5.6-sol")
-        ? "gpt-5.6-sol"
-        : (Object.keys(MODEL_PRICING_BRL_PER_1M).find((key) => normalizedModel.startsWith(key)) ?? "");
+  const matchedPricingKey = normalizedModel.startsWith("gpt-6-astra")
+    ? "gpt-6-astra"
+    : normalizedModel.startsWith("gpt-5.6-luna")
+      ? "gpt-5.6-luna"
+      : normalizedModel.startsWith("gpt-5.6-terra")
+        ? "gpt-5.6-terra"
+        : normalizedModel.startsWith("gpt-5.6-sol")
+          ? "gpt-5.6-sol"
+          : (Object.keys(MODEL_PRICING_BRL_PER_1M).find((key) => normalizedModel.startsWith(key)) ?? "");
   return matchedPricingKey ? MODEL_PRICING_BRL_PER_1M[matchedPricingKey] : null;
 };
 

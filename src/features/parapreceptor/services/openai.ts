@@ -91,7 +91,7 @@ export interface ExecuteLLMParams {
   systemPrompt?: string;
   maxOutputTokens?: number;
   verbosity?: "low" | "medium" | "high";
-  reasoningEffort?: "none" | "low" | "medium" | "high";
+  reasoningEffort?: "none" | "low" | "medium" | "high" | "xhigh" | "max";
   /** Rótulos ("ALLWV") ou ids "vs_…"; o servidor resolve os rótulos. */
   vectorStores?: string[];
   inputFileIds?: string[];
@@ -123,17 +123,24 @@ export interface ExecuteLLMResult {
 }
 
 export async function executeLLM(params: ExecuteLLMParams): Promise<ExecuteLLMResult> {
+  const chosenModel = params.model ?? LLM_DEFAULT_MODEL;
+  const isGpt6 = chosenModel.toLowerCase().startsWith("gpt-6");
+  let reasoningEffort = params.reasoningEffort ?? (isGpt6 ? "low" : LLM_DEFAULT_GPT5_EFFORT);
+  if (isGpt6 && (reasoningEffort === "none" || !reasoningEffort)) {
+    reasoningEffort = "low";
+  }
+
   const vectorStores = params.vectorStores?.map((id) => id.trim()).filter(Boolean);
   const inputFileIds = params.inputFileIds?.map((id) => id.trim()).filter(Boolean);
   const tools = params.tools?.filter(Boolean);
   const body: Record<string, unknown> = {
-    model: params.model ?? LLM_DEFAULT_MODEL,
+    model: chosenModel,
     messages: params.messages,
     previousResponseId: params.previousResponseId,
     systemPrompt: params.systemPrompt ?? LLM_DEFAULT_SYSTEM_PROMPT,
     maxOutputTokens: params.maxOutputTokens,
     verbosity: params.verbosity ?? LLM_DEFAULT_GPT5_VERBOSITY,
-    reasoningEffort: params.reasoningEffort ?? LLM_DEFAULT_GPT5_EFFORT,
+    reasoningEffort,
     vectorMaxResults: params.vectorMaxResults ?? 5,
   };
   if (vectorStores && vectorStores.length > 0) body.vectorStores = vectorStores;

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -57,56 +58,100 @@ const AiAssistantConfigPanel = ({
   canToggleIncludeEditorContextInLlm = true,
   extraContent,
   footerContent,
-}: AiAssistantConfigPanelProps) => (
-  <div className="space-y-3 pr-1">
-    <div className="space-y-1.5">
-      <Label className="block pb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Configurações LLM</Label>
-      <div className="flex items-center gap-0">
-        <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Modelo</Label>
-        <select
-          value={llmModel}
-          onChange={(e) => onLlmModelChange(e.target.value)}
-          className="h-7 w-full rounded-md border border-input bg-white px-2.5 text-[10px] text-foreground outline-none"
-        >
-          {LLM_MODEL_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="flex items-center gap-0">
-        <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Max Tokens</Label>
-        <Input
-          type="number"
-          min="1"
-          value={llmMaxOutputTokens}
-          onChange={(e) => onLlmMaxOutputTokensChange(e.target.value ? Number(e.target.value) : 1000)}
-          className="h-7 bg-white px-2.5 !text-[10px] md:!text-[10px]"
-        />
-      </div>
-      <div className="flex items-center gap-0">
-        <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Verbosity</Label>
-        <Input
-          value={llmVerbosity}
-          onChange={(e) => onLlmVerbosityChange(e.target.value)}
-          placeholder="low | medium | high"
-          className="h-7 bg-white px-2.5 !text-[10px] md:!text-[10px]"
-        />
-      </div>
-      <div className="flex items-center gap-0">
-        <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Effort</Label>
-        <select
-          value={llmEffort || "none"}
-          onChange={(e) => onLlmEffortChange(e.target.value)}
-          className="h-7 w-full rounded-md border border-input bg-white px-2.5 text-[10px] text-foreground outline-none"
-        >
-          <option value="none">none</option>
-          <option value="low">low</option>
-          <option value="medium">medium</option>
-          <option value="high">high</option>
-        </select>
-      </div>
+}: AiAssistantConfigPanelProps) => {
+  const isGpt6 = (llmModel || "").toLowerCase().startsWith("gpt-6");
+
+  const effortOptions = useMemo(() => {
+    if (isGpt6) {
+      return [
+        { value: "low", label: "low" },
+        { value: "medium", label: "medium" },
+        { value: "high", label: "high" },
+        { value: "xhigh", label: "xhigh" },
+        { value: "max", label: "max" },
+      ];
+    }
+    return [
+      { value: "none", label: "none" },
+      { value: "low", label: "low" },
+      { value: "medium", label: "medium" },
+      { value: "high", label: "high" },
+    ];
+  }, [isGpt6]);
+
+  const handleModelChange = (newModel: string) => {
+    onLlmModelChange(newModel);
+    const isNewGpt6 = newModel.toLowerCase().startsWith("gpt-6");
+    if (isNewGpt6) {
+      if (llmEffort === "none" || !llmEffort) {
+        onLlmEffortChange("low");
+      }
+      if (llmMaxOutputTokens < 2000) {
+        onLlmMaxOutputTokensChange(2000);
+      }
+    } else {
+      if (llmEffort === "xhigh" || llmEffort === "max") {
+        onLlmEffortChange("high");
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-3 pr-1">
+      <div className="space-y-1.5">
+        <Label className="block pb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Configurações LLM</Label>
+        <div className="flex items-center gap-0">
+          <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Modelo</Label>
+          <select
+            value={llmModel}
+            onChange={(e) => handleModelChange(e.target.value)}
+            className="h-7 w-full rounded-md border border-input bg-white px-2.5 text-[10px] text-foreground outline-none"
+          >
+            {LLM_MODEL_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-0">
+          <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Max Tokens</Label>
+          <Input
+            type="number"
+            min="1"
+            value={llmMaxOutputTokens}
+            onChange={(e) => onLlmMaxOutputTokensChange(e.target.value ? Number(e.target.value) : 1000)}
+            className="h-7 bg-white px-2.5 !text-[10px] md:!text-[10px]"
+          />
+        </div>
+        <div className="flex items-center gap-0">
+          <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Verbosity</Label>
+          <Input
+            value={llmVerbosity}
+            onChange={(e) => onLlmVerbosityChange(e.target.value)}
+            placeholder="low | medium | high"
+            className="h-7 bg-white px-2.5 !text-[10px] md:!text-[10px]"
+          />
+        </div>
+        <div className="flex items-center gap-0">
+          <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Effort</Label>
+          <select
+            value={llmEffort || (isGpt6 ? "low" : "none")}
+            onChange={(e) => onLlmEffortChange(e.target.value)}
+            className="h-7 w-full rounded-md border border-input bg-white px-2.5 text-[10px] text-foreground outline-none"
+          >
+            {effortOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {isGpt6 ? (
+          <p className="text-[9px] text-muted-foreground pt-0.5 leading-tight">
+            GPT-6 Astra: raciocínio avançado (effort: low a max, sem nível none). Tokens incluem raciocínio interno.
+          </p>
+        ) : null}
       {showVectorStore ? (
         <div className="space-y-1.5">
           <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Vector Store</Label>
@@ -168,7 +213,8 @@ const AiAssistantConfigPanel = ({
       </>
     ) : null}
   </div>
-);
+  );
+};
 
 export default AiAssistantConfigPanel;
 

@@ -82,5 +82,31 @@ describe("useParapreceptorLlmLogs", () => {
 
     expect(result.current.latestEstimatedUsd).toBeCloseTo(14.00, 2);
   });
+
+  it("calculates estimated cost correctly for gpt-6-astra", () => {
+    const astraLog: LlmLogEntry = {
+      id: "2",
+      at: "2026-09-14T09:00:00Z",
+      request: { prompt: "test" },
+      response: {
+        meta: {
+          model: "gpt-6-astra",
+          usage: {
+            input_tokens: 1_000_000,
+            output_tokens: 1_000_000,
+          },
+        },
+      },
+    };
+
+    const { result } = renderHook(() => useParapreceptorLlmLogs({
+      llmLogs: [astraLog],
+      llmSessionLogs: [astraLog],
+      llmModel: "gpt-6-astra",
+      llmLogFontScale: 1,
+    }));
+
+    expect(result.current.latestEstimatedUsd).toBeCloseTo(60.00, 2);
+  });
 });
 

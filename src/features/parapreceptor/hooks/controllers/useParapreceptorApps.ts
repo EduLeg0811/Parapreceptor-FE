@@ -500,7 +500,7 @@ const useParapreceptorApps = ({
     if (lexicalBooks.length > 0) return lexicalBooks;
     try {
       const data = await listLexicalBooksApp();
-      const books = normalizeLexicalBookOptions(data.result.books);
+      const books = normalizeLexicalBookOptions(data?.result?.books ?? (data as any)?.sources ?? (data as any)?.books);
       setLexicalBooks(books);
       if (!books.some((item) => item.id === selectedLexicalBook)) {
         const preferred = books.find((item) => item.id === "LO");
@@ -521,7 +521,7 @@ const useParapreceptorApps = ({
     setIsLoadingSemanticSearchIndexes(true);
     try {
       const data = await listSemanticIndexesApp();
-      const indexes = data.result.indexes?.length ? data.result.indexes : [];
+      const indexes = data?.result?.indexes?.length ? data.result.indexes : ((data as any)?.indexes ?? []);
       setSemanticSearchIndexes(indexes);
       setSelectedSemanticSearchIndexId((prev) => {
         if (prev && indexes.some((item) => item.id === prev)) return prev;
@@ -774,8 +774,9 @@ const useParapreceptorApps = ({
     setIsRunningLexicalSearch(true);
     try {
       const data = await searchLexicalBookApp({ book, term, limit: maxResults, miniTextWindow: miniArlindoTextWindow });
-      const totalFound = Number(data.result.total || 0);
-      const matches = (data.result.matches || []).slice(0, maxResults);
+      const resultObj = data?.result ?? data ?? {};
+      const totalFound = Number(resultObj.total ?? (resultObj as any).totalFound ?? 0);
+      const matches = ((resultObj.matches ?? (resultObj as any).results ?? []) as any[]).slice(0, maxResults);
       if (matches.length <= 0) {
         toast.info("Nenhuma ocorrencia encontrada.");
         return;
@@ -806,9 +807,10 @@ const useParapreceptorApps = ({
     setIsRunningLexicalOverview(true);
     try {
       const data = await searchLexicalOverviewApp({ term, limit, miniTextWindow: miniArlindoTextWindow, sourceIds });
-      const totalBooks = Number(data.result.totalBooks || 0);
-      const totalFound = Number(data.result.totalFound || 0);
-      const groups = data.result.groups || [];
+      const resultObj = data?.result ?? data ?? {};
+      const totalBooks = Number(resultObj.totalBooks ?? (resultObj.groups || []).length ?? 0);
+      const totalFound = Number(resultObj.totalFound ?? 0);
+      const groups = resultObj.groups ?? [];
       if (groups.length <= 0 || totalFound <= 0) {
         toast.info("Nenhuma ocorrencia encontrada.");
         return;
@@ -890,14 +892,15 @@ const useParapreceptorApps = ({
         excludeLexicalDuplicates: semanticExcludeLexicalDuplicates,
         vectorStoreIds
       });
-      const totalFound = Number(data.result.total || 0);
-      const requestedMinScore = typeof data.result.requestedMinScore === "number" ? data.result.requestedMinScore : null;
-      const recommendedMinScore = Number(data.result.recommendedMinScore ?? 0);
-      const minScore = Number(data.result.minScore || recommendedMinScore || 0);
-      const lexicalFilteredCount = Number(data.result.lexicalFilteredCount || 0);
-      setSemanticSearchLastRagContext(data.result.ragContext ?? null);
-      pushLlmLogEntry(data.result.ragLlmLog);
-      const matches = (data.result.matches || []).slice(0, maxResults);
+      const resultObj = data?.result ?? data ?? {};
+      const totalFound = Number(resultObj.total ?? (resultObj as any).totalFound ?? 0);
+      const requestedMinScore = typeof resultObj.requestedMinScore === "number" ? resultObj.requestedMinScore : null;
+      const recommendedMinScore = Number(resultObj.recommendedMinScore ?? 0);
+      const minScore = Number(resultObj.minScore || (resultObj as any).minScoreUsed || recommendedMinScore || 0);
+      const lexicalFilteredCount = Number(resultObj.lexicalFilteredCount || 0);
+      setSemanticSearchLastRagContext(resultObj.ragContext ?? null);
+      pushLlmLogEntry(resultObj.ragLlmLog);
+      const matches = ((resultObj.matches ?? (resultObj as any).results ?? []) as any[]).slice(0, maxResults);
       if (matches.length <= 0) {
         toast.info(buildSemanticSearchEmptyMessage({
           minScore,
@@ -954,16 +957,17 @@ const useParapreceptorApps = ({
         vectorStoreIds,
         sourceIds
       });
-      const totalIndexes = Number(data.result.totalIndexes || 0);
-      const totalFound = Number(data.result.totalFound || 0);
-      const recommendedMinScoreMin = Number(data.result.recommendedMinScoreMin || 0);
-      const recommendedMinScoreMax = Number(data.result.recommendedMinScoreMax || 0);
-      const minScore = typeof data.result.minScore === "number" ? data.result.minScore : recommendedMinScoreMin;
-      const usesCalibratedMinScores = Boolean(data.result.usesCalibratedMinScores);
-      const lexicalFilteredCount = Number(data.result.lexicalFilteredCount || 0);
-      setSemanticOverviewLastRagContext(data.result.ragContext ?? null);
-      pushLlmLogEntry(data.result.ragLlmLog);
-      const groups = data.result.groups || [];
+      const resultObj = data?.result ?? data ?? {};
+      const totalIndexes = Number(resultObj.totalIndexes || 0);
+      const totalFound = Number(resultObj.totalFound || 0);
+      const recommendedMinScoreMin = Number(resultObj.recommendedMinScoreMin || 0);
+      const recommendedMinScoreMax = Number(resultObj.recommendedMinScoreMax || 0);
+      const minScore = typeof resultObj.minScore === "number" ? resultObj.minScore : recommendedMinScoreMin;
+      const usesCalibratedMinScores = Boolean(resultObj.usesCalibratedMinScores);
+      const lexicalFilteredCount = Number(resultObj.lexicalFilteredCount || 0);
+      setSemanticOverviewLastRagContext(resultObj.ragContext ?? null);
+      pushLlmLogEntry(resultObj.ragLlmLog);
+      const groups = resultObj.groups ?? [];
       if (groups.length <= 0 || totalFound <= 0) {
         toast.info(buildSemanticOverviewEmptyMessage({
           minScore,
@@ -1014,8 +1018,9 @@ const useParapreceptorApps = ({
     setIsRunningVerbeteSearch(true);
     try {
       const data = await searchVerbeteApp({ author, title, area, text, limit: maxResults });
-      const totalFound = Number(data.result.total || 0);
-      const matches = (data.result.matches || []).slice(0, maxResults);
+      const resultObj = data?.result ?? data ?? {};
+      const totalFound = Number(resultObj.total ?? (resultObj as any).totalFound ?? 0);
+      const matches = ((resultObj.matches ?? (resultObj as any).results ?? []) as any[]).slice(0, maxResults);
       if (matches.length <= 0) {
         toast.info("Nenhum verbete encontrado.");
         return;

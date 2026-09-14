@@ -14,6 +14,7 @@ export const DEFAULT_LOG_LINE_HEIGHT_RATIO = 1.1;
 export const DEFAULT_DOLLAR_TOKEN = 5.5;
 export const CONFIG_PROMPT_ROWS = 5;
 export const LLM_MODEL_OPTIONS = [
+  { value: "gpt-6-astra", label: "gpt-6-astra" },
   { value: "gpt-5.6-terra", label: "gpt-5.6-terra" },
   { value: "gpt-5.6-luna", label: "gpt-5.6-luna" },
   { value: "gpt-5.6-sol", label: "gpt-5.6-sol" },
@@ -73,6 +74,7 @@ export const DEFAULT_SEMANTIC_MIN_SCORE = 0.25;
 export const PDF_HEADER_SIGNATURE_RE = /enciclop(?:é|e)dia\s+da\s+conscienciologia/i;
 export const CHAT_EDITOR_CONTEXT_MAX_CHARS = 10000;
 export const MODEL_PRICING_BRL_PER_1M: Record<string, { input: number; cached_input: number; output: number }> = {
+  "gpt-6-astra": { input: 55.0, cached_input: 5.5, output: 275.0 },
   "gpt-5.6-luna": { input: 1.1, cached_input: 0.11, output: 6.6 },
   "gpt-5.6-terra": { input: 11.0, cached_input: 1.1, output: 66.0 },
   "gpt-5.6-sol": { input: 27.5, cached_input: 2.75, output: 165.0 },

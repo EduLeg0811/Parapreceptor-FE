@@ -40,6 +40,10 @@ export type LexicalBookOption = SelectOption & {
   indexId?: string;
   fileStem?: string;
 };
+export type BiblioWvBookOption = SelectOption & {
+  title: string;
+  sigla: string;
+};
 export type Macro2SpacingMode = "normal_single" | "normal_double" | "nbsp_single" | "nbsp_double";
 export type RefBookMode = "bee" | "simples";
 export type SemanticIndexOption = {

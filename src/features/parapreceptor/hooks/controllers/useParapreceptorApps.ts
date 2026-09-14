@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import { biblioExternaApp, biblioGeralApp, insertRefBookMacro, insertRefVerbeteApp, listLexicalBooksApp, listSemanticIndexesApp, lookupLexicalCitationsApp, openVerbetografiaTableApp, openVerbetografiaTableWordApp, randomPensataApp, searchLexicalBookApp, searchLexicalOverviewApp, searchSemanticOverviewApp, searchVerbeteApp, semanticSearchPensatasApp } from "@/features/parapreceptor/api/backendApi";
+import { biblioExternaApp, biblioGeralApp, insertRefBookMacro, insertRefVerbeteApp, listBiblioWvBooksApp, listLexicalBooksApp, listSemanticIndexesApp, lookupLexicalCitationsApp, openVerbetografiaTableApp, openVerbetografiaTableWordApp, randomPensataApp, searchLexicalBookApp, searchLexicalOverviewApp, searchSemanticOverviewApp, searchVerbeteApp, semanticSearchPensatasApp } from "@/features/parapreceptor/api/backendApi";
 import { executeLLM, buildPensataAnalysisPrompt, buildVerbeteDefinologiaPrompt, buildVerbeteFatologiaPrompt, buildVerbeteFraseEnfaticaPrompt, buildVerbeteSinonimologiaPrompt } from "@/features/parapreceptor/services/openai";
 import { applySystemPromptOverride, getActionSystemPrompt, type ActionSystemPromptId } from "@/features/parapreceptor/config/actionSystemPrompts";
 import { NO_VECTOR_STORE_ID } from "@/features/parapreceptor/config/constants";
 import { normalizeIdList } from "@/features/parapreceptor/config/metadata";
 import { DEFAULT_BOOK_SOURCE_ID } from "@/features/parapreceptor/config/options";
-import type { ActionItemId, AIResponse, AppPanelScope, LexicalBookOption, LlmLogEntry, ParameterPanelTarget, RefBookMode, SemanticActionId, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
+import type { ActionItemId, AIResponse, AppPanelScope, BiblioWvBookOption, LexicalBookOption, LlmLogEntry, ParameterPanelTarget, RefBookMode, SemanticActionId, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
 import { resolveActionItem, resolveSemanticActionId } from "@/features/parapreceptor/config/appRegistry";
 import { buildLexicalCitationLookupHistoryResponsePayload, buildLexicalOverviewHistoryResponsePayload, buildLexicalSearchHistoryResponsePayload, buildSemanticOverviewHistoryResponsePayload, buildSemanticSearchHistoryResponsePayload } from "@/features/parapreceptor/utils/history/historySearchResponses";
 import { HtmlEditorControlApi } from "@/features/parapreceptor/services/htmlEditorControl";
@@ -33,6 +33,10 @@ interface UseParapreceptorAppsParams {
   setActionText: Dispatch<SetStateAction<string>>;
   selectedRefBook: string;
   setSelectedRefBook: Dispatch<SetStateAction<string>>;
+  biblioWvBooks: BiblioWvBookOption[];
+  setBiblioWvBooks: Dispatch<SetStateAction<BiblioWvBookOption[]>>;
+  isLoadingBiblioWvBooks: boolean;
+  setIsLoadingBiblioWvBooks: Dispatch<SetStateAction<boolean>>;
   refBookMode: RefBookMode;
   refBookPages: string;
   verbeteInput: string;
@@ -240,6 +244,10 @@ const useParapreceptorApps = ({
   setActionText,
   selectedRefBook,
   setSelectedRefBook,
+  biblioWvBooks,
+  setBiblioWvBooks,
+  isLoadingBiblioWvBooks,
+  setIsLoadingBiblioWvBooks,
   refBookMode,
   refBookPages,
   verbeteInput,
@@ -352,7 +360,10 @@ const useParapreceptorApps = ({
       const pages = normalizeRefPages(refBookPages);
       const result = pages ? `${rawResult}; p. ${pages}.` : rawResult;
       if (result) {
-        const selectedRefBookLabel = lexicalBooks.find((item) => item.id === selectedRefBook)?.label || selectedRefBook;
+        const selectedRefBookLabel =
+          biblioWvBooks.find((item) => item.id === selectedRefBook)?.label ||
+          lexicalBooks.find((item) => item.id === selectedRefBook)?.label ||
+          selectedRefBook;
         addResponse("app_ref_book", `Livro: ${selectedRefBookLabel}${pages ? ` | p. ${pages}` : ""}`, result);
       }
     } catch (err: unknown) {
@@ -361,7 +372,7 @@ const useParapreceptorApps = ({
     } finally {
       setIsRunningInsertRefBook(false);
     }
-  }, [addResponse, lexicalBooks, refBookMode, refBookPages, selectedRefBook, setIsRunningInsertRefBook, toast]);
+  }, [addResponse, biblioWvBooks, lexicalBooks, refBookMode, refBookPages, selectedRefBook, setIsRunningInsertRefBook, toast]);
 
   const handleRunInsertRefVerbete = useCallback(async () => {
     const raw = verbeteInput.trim();
@@ -496,6 +507,27 @@ const useParapreceptorApps = ({
     }
   }, [addResponse, biblioExternaAuthor, biblioExternaExtra, biblioExternaFreeText, biblioExternaIdentifier, biblioExternaJournal, biblioExternaLlmEffort, biblioExternaLlmMaxOutputTokens, biblioExternaLlmModel, biblioExternaLlmSystemPrompt, biblioExternaLlmVerbosity, biblioExternaPublisher, biblioExternaTitle, biblioExternaYear, pushLlmLogEntry, setIsRunningBiblioExterna, toast]);
 
+  const ensureBiblioWvBooksLoaded = useCallback(async (force = false) => {
+    if (!force && biblioWvBooks.length > 0) return biblioWvBooks;
+    setIsLoadingBiblioWvBooks(true);
+    try {
+      const data = await listBiblioWvBooksApp();
+      const books = data?.result?.books ?? [];
+      setBiblioWvBooks(books);
+      if (books.length > 0 && !books.some((item) => item.id === selectedRefBook)) {
+        const preferred = books.find((item) => item.id === "LO2") || books.find((item) => item.id === "LO");
+        setSelectedRefBook(preferred?.id ?? books[0]?.id ?? "LO2");
+      }
+      return books;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Falha ao carregar livros para Bibliografia WV.";
+      toast.error(msg);
+      return [];
+    } finally {
+      setIsLoadingBiblioWvBooks(false);
+    }
+  }, [biblioWvBooks, selectedRefBook, setIsLoadingBiblioWvBooks, setBiblioWvBooks, setSelectedRefBook, toast]);
+
   const ensureLexicalBooksLoaded = useCallback(async () => {
     if (lexicalBooks.length > 0) return lexicalBooks;
     try {
@@ -516,8 +548,8 @@ const useParapreceptorApps = ({
     }
   }, [lexicalBooks, selectedLexicalBook, setLexicalBooks, setSelectedLexicalBook, toast]);
 
-  const ensureSemanticIndexesLoaded = useCallback(async () => {
-    if (semanticSearchIndexes.length > 0) return semanticSearchIndexes;
+  const ensureSemanticIndexesLoaded = useCallback(async (force = false) => {
+    if (!force && semanticSearchIndexes.length > 0) return semanticSearchIndexes;
     setIsLoadingSemanticSearchIndexes(true);
     try {
       const data = await listSemanticIndexesApp();
@@ -552,8 +584,11 @@ const useParapreceptorApps = ({
     if (semanticId === "biblio_externa" && !biblioExternaTitle.trim() && actionText.trim()) {
       setBiblioExternaTitle(actionText.trim());
     }
-    if (semanticId === "busca_livros" || semanticId === "lexical_overview" || semanticId === "biblio_livros") {
+    if (semanticId === "busca_livros" || semanticId === "lexical_overview") {
       void ensureLexicalBooksLoaded();
+    }
+    if (semanticId === "biblio_livros") {
+      void ensureBiblioWvBooksLoaded();
     }
     if (semanticId === "busca_semantica" || semanticId === "semantic_overview") {
       void ensureSemanticIndexesLoaded();
@@ -1080,6 +1115,7 @@ const useParapreceptorApps = ({
   }, [addResponse, backendNotReadyMessage, executeLLMWithLog, isLoading, openAiReady, setIsLoading, toast]);
 
   return {
+    ensureBiblioWvBooksLoaded,
     ensureLexicalBooksLoaded,
     ensureSemanticIndexesLoaded,
     handleActionApps,

@@ -1,9 +1,11 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { DEFAULT_BOOK_SEARCH_MAX_RESULTS } from "@/features/parapreceptor/config/constants";
 import { ALL_OVERVIEW_SOURCE_IDS, DEFAULT_OVERVIEW_SOURCE_IDS } from "@/features/parapreceptor/config/overviewSources";
-import type { LexicalBookOption, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
+import type { BiblioWvBookOption, LexicalBookOption, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
 export const useParapreceptorAppsState = () => {
-  const [selectedRefBook, setSelectedRefBook] = useState("LO");
+  const [selectedRefBook, setSelectedRefBook] = useState("LO2");
+  const [biblioWvBooks, setBiblioWvBooks] = useState<BiblioWvBookOption[]>([]);
+  const [isLoadingBiblioWvBooks, setIsLoadingBiblioWvBooks] = useState(false);
   const [refBookMode, setRefBookMode] = useState<"bee" | "simples">("bee");
   const [refBookPages, setRefBookPages] = useState("");
   const [isRunningInsertRefBook, setIsRunningInsertRefBook] = useState(false);
@@ -66,6 +68,10 @@ export const useParapreceptorAppsState = () => {
   return {
     selectedRefBook,
     setSelectedRefBook,
+    biblioWvBooks,
+    setBiblioWvBooks,
+    isLoadingBiblioWvBooks,
+    setIsLoadingBiblioWvBooks,
     refBookMode,
     setRefBookMode,
     refBookPages,

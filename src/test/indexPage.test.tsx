@@ -17,6 +17,7 @@ vi.mock("@/features/parapreceptor/api/backendApi", () => ({
   fetchLexicalOverviewProgress: vi.fn().mockResolvedValue({ ok: true, result: { status: "idle", events: [] } }),
   insertRefBookMacro: vi.fn(),
   insertRefVerbeteApp: vi.fn(),
+  listBiblioWvBooksApp: vi.fn().mockResolvedValue({ result: { books: [] } }),
   listSemanticIndexesApp: vi.fn().mockResolvedValue({ result: { indexes: [] } }),
   listLexicalBooksApp: vi.fn().mockResolvedValue({ result: { books: [] } }),
   lookupLexicalCitationsApp: vi.fn(),

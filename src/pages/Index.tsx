@@ -63,7 +63,7 @@ const Index = () => {
   } = documentState;
   const appState = useParapreceptorAppsState();
   const {
-    selectedRefBook, setSelectedRefBook, refBookMode, setRefBookMode, refBookPages, setRefBookPages, isRunningInsertRefBook, setIsRunningInsertRefBook, verbeteInput, setVerbeteInput,
+    selectedRefBook, setSelectedRefBook, biblioWvBooks, setBiblioWvBooks, isLoadingBiblioWvBooks, setIsLoadingBiblioWvBooks, refBookMode, setRefBookMode, refBookPages, setRefBookPages, isRunningInsertRefBook, setIsRunningInsertRefBook, verbeteInput, setVerbeteInput,
     isRunningInsertRefVerbete, setIsRunningInsertRefVerbete, biblioGeralAuthor, setBiblioGeralAuthor, biblioGeralTitle, setBiblioGeralTitle, biblioGeralYear, setBiblioGeralYear,
     biblioGeralExtra, setBiblioGeralExtra, isRunningBiblioGeral, setIsRunningBiblioGeral, biblioExternaAuthor, setBiblioExternaAuthor, biblioExternaTitle, setBiblioExternaTitle,
     biblioExternaYear, setBiblioExternaYear, biblioExternaJournal, setBiblioExternaJournal, biblioExternaPublisher, setBiblioExternaPublisher, biblioExternaIdentifier,
@@ -183,6 +183,9 @@ const Index = () => {
     toast
   });
   const {
+    ensureBiblioWvBooksLoaded,
+    ensureLexicalBooksLoaded,
+    ensureSemanticIndexesLoaded,
     handleActionApps,
     handleSelectRefBook,
     handleRunInsertRefBook,
@@ -361,7 +364,14 @@ const Index = () => {
   const handleOpenParameterSection = useCallback((section: ParameterPanelSection) => {
     setParameterPanelTarget({ section, id: null });
     focusMobilePanel("center");
-  }, [focusMobilePanel, setParameterPanelTarget]);
+    if (section === "semantic_search") {
+      void ensureSemanticIndexesLoaded();
+    } else if (section === "lexical_search") {
+      void ensureLexicalBooksLoaded();
+    } else if (section === "bibliografia") {
+      void ensureBiblioWvBooksLoaded();
+    }
+  }, [ensureBiblioWvBooksLoaded, ensureLexicalBooksLoaded, ensureSemanticIndexesLoaded, focusMobilePanel, setParameterPanelTarget]);
 
   const handleOpenAiActionParameters = useCallback((type: AiActionId) => {
     baseHandleOpenAiActionParameters(type);
@@ -634,6 +644,9 @@ const Index = () => {
         aiActionsSelectedVectorStoreIds={aiActionsSelectedVectorStoreIds}
         aiActionVectorStoreOptions={aiActionVectorStoreOptions}
         selectedRefBook={selectedRefBook}
+        biblioWvBooks={biblioWvBooks}
+        isLoadingBiblioWvBooks={isLoadingBiblioWvBooks}
+        onReloadBiblioWvBooks={() => void ensureBiblioWvBooksLoaded(true)}
         refBookMode={refBookMode}
         refBookPages={refBookPages}
         isRunningInsertRefBook={isRunningInsertRefBook}
@@ -665,6 +678,7 @@ const Index = () => {
         selectedSemanticSearchIndexId={selectedSemanticSearchIndexId}
         semanticSearchIndexes={semanticSearchIndexes}
         isLoadingSemanticSearchIndexes={isLoadingSemanticSearchIndexes}
+        onReloadSemanticIndexes={() => void ensureSemanticIndexesLoaded(true)}
         semanticSearchQuery={semanticSearchQuery}
         semanticSearchMaxResults={semanticSearchMaxResults}
         semanticMinScore={semanticMinScore}

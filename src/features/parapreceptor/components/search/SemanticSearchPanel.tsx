@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, X } from "lucide-react";
+import { Loader2, Play, RotateCw, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +17,7 @@ interface SemanticSearchPanelProps {
   selectedIndexId: string;
   availableIndexes: SemanticIndexOption[];
   isLoadingIndexes: boolean;
+  onReloadIndexes?: () => void;
   onSelectedIndexChange: (value: string) => void;
   query: string;
   maxResults: number;
@@ -43,6 +44,7 @@ const SemanticSearchPanel = ({
   selectedIndexId,
   availableIndexes,
   isLoadingIndexes,
+  onReloadIndexes,
   onSelectedIndexChange,
   query,
   maxResults,
@@ -69,8 +71,8 @@ const SemanticSearchPanel = ({
   const resizeQueryTextarea = () => {
     const el = queryTextareaRef.current;
     if (!el) return;
-    el.style.height = "72px";
-    el.style.height = `${el.scrollHeight}px`;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 220)}px`;
   };
 
   useEffect(() => {
@@ -105,7 +107,23 @@ const SemanticSearchPanel = ({
         {showPanelChrome ? <Separator /> : null}
 
         <div className="space-y-2">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Base Vetorial</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Base Vetorial</Label>
+            {onReloadIndexes ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onReloadIndexes}
+                disabled={isLoadingIndexes}
+                className="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground"
+                title="Recarregar bases vetoriais"
+              >
+                <RotateCw className={`h-3 w-3 mr-1 ${isLoadingIndexes ? "animate-spin" : ""}`} />
+                Atualizar
+              </Button>
+            ) : null}
+          </div>
           <SourceSelect
             items={availableIndexes.map((item) => ({
               id: item.id,
@@ -117,6 +135,18 @@ const SemanticSearchPanel = ({
             emptyLabel="Nenhum índice semântico disponível."
             onChange={onSelectedIndexChange}
           />
+          {availableIndexes.length === 0 && !isLoadingIndexes && onReloadIndexes ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onReloadIndexes}
+              className="mt-1 h-7 text-xs"
+            >
+              <RotateCw className="h-3 w-3 mr-1.5" />
+              Tentar novamente
+            </Button>
+          ) : null}
           {selectedIndex ? (
             <div className="space-y-1">
               <p className="text-[11px] leading-relaxed text-muted-foreground">

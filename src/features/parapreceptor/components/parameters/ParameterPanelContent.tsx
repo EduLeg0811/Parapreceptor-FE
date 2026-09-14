@@ -9,7 +9,7 @@ import { BOOK_SOURCE, DEFAULT_BOOK_SOURCE_ID, MACRO1_HIGHLIGHT_COLORS, TRANSLATE
 import type { TextStats } from "@/features/parapreceptor/hooks/useTextStats";
 import type { UploadedLlmFile } from "@/features/parapreceptor/services/openai";
 import { AI_PANEL_SECTIONS, APP_PANEL_SECTIONS, resolveSemanticActionId } from "@/features/parapreceptor/config/appRegistry";
-import type { ActionItemId, AiActionId, AiPanelScope, AppPanelScope, LexicalBookOption, Macro2SpacingMode, ParameterPanelTarget, RefBookMode, RewritePromptType, SelectOption, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
+import type { ActionItemId, AiActionId, AiPanelScope, AppPanelScope, BiblioWvBookOption, LexicalBookOption, Macro2SpacingMode, ParameterPanelTarget, RefBookMode, RewritePromptType, SelectOption, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
 
 type NonNullParameterPanelTarget = Exclude<ParameterPanelTarget, null>;
 
@@ -46,6 +46,9 @@ interface ParameterPanelContentProps {
   aiActionsSelectedVectorStoreIds: string[];
   aiActionVectorStoreOptions: SelectOption[];
   selectedRefBook: string;
+  biblioWvBooks?: BiblioWvBookOption[];
+  isLoadingBiblioWvBooks?: boolean;
+  onReloadBiblioWvBooks?: () => void;
   refBookMode: RefBookMode;
   refBookPages: string;
   isRunningInsertRefBook: boolean;
@@ -77,6 +80,7 @@ interface ParameterPanelContentProps {
   selectedSemanticSearchIndexId: string;
   semanticSearchIndexes: SemanticIndexOption[];
   isLoadingSemanticSearchIndexes: boolean;
+  onReloadSemanticIndexes?: () => void;
   semanticSearchQuery: string;
   semanticSearchMaxResults: number;
   semanticMinScore: number | null;
@@ -231,6 +235,9 @@ const ParameterPanelContent = ({
   aiActionsSelectedVectorStoreIds,
   aiActionVectorStoreOptions,
   selectedRefBook,
+  biblioWvBooks,
+  isLoadingBiblioWvBooks,
+  onReloadBiblioWvBooks,
   refBookMode,
   refBookPages,
   isRunningInsertRefBook,
@@ -262,6 +269,7 @@ const ParameterPanelContent = ({
   selectedSemanticSearchIndexId,
   semanticSearchIndexes,
   isLoadingSemanticSearchIndexes,
+  onReloadSemanticIndexes,
   semanticSearchQuery,
   semanticSearchMaxResults,
   semanticMinScore,
@@ -502,6 +510,9 @@ const ParameterPanelContent = ({
             appId={parameterPanelTarget.id}
             appPanelScope={parameterPanelTarget.section as AppPanelScope}
             selectedRefBook={selectedRefBook}
+            biblioWvBooks={biblioWvBooks}
+            isLoadingBiblioWvBooks={isLoadingBiblioWvBooks}
+            onReloadBiblioWvBooks={onReloadBiblioWvBooks}
             refBookMode={refBookMode}
             refBookPages={refBookPages}
             isRunningInsertRefBook={isRunningInsertRefBook}
@@ -533,6 +544,7 @@ const ParameterPanelContent = ({
             selectedSemanticSearchIndexId={selectedSemanticSearchIndexId}
             semanticSearchIndexes={semanticSearchIndexes}
             isLoadingSemanticSearchIndexes={isLoadingSemanticSearchIndexes}
+            onReloadSemanticIndexes={onReloadSemanticIndexes}
             semanticSearchQuery={semanticSearchQuery}
             semanticSearchMaxResults={semanticSearchMaxResults}
             semanticMinScore={semanticMinScore}

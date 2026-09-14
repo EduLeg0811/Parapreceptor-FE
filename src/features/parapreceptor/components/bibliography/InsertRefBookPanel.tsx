@@ -1,14 +1,14 @@
-﻿import { Label } from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, X } from "lucide-react";
+import { Loader2, Play, RotateCw, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { primaryActionButtonClass } from "@/styles/buttonStyles";
 import { panelsTopMenuBarBgClass } from "@/styles/backgroundColors";
 import SourceRadioList from "@/features/parapreceptor/components/common/SourceRadioList";
 import type { LexicalBookOption, RefBookMode } from "@/features/parapreceptor/types";
 
-const FALLBACK_REF_BOOK_OPTIONS: LexicalBookOption[] = [{ id: "LO", label: "LO" }];
+const FALLBACK_REF_BOOK_OPTIONS: LexicalBookOption[] = [{ id: "LO2", label: "LO2" }];
 
 interface InsertRefBookPanelProps {
   title: string;
@@ -22,6 +22,8 @@ interface InsertRefBookPanelProps {
   onRefBookPagesChange: (value: string) => void;
   onRunInsertRefBook: () => void;
   isRunningInsertRefBook: boolean;
+  isLoadingBooks?: boolean;
+  onReloadBooks?: () => void;
   onClose?: () => void;
   showPanelChrome?: boolean;
 }
@@ -38,10 +40,12 @@ const InsertRefBookPanel = ({
   onRefBookPagesChange,
   onRunInsertRefBook,
   isRunningInsertRefBook,
+  isLoadingBooks = false,
+  onReloadBooks,
   onClose,
   showPanelChrome = true,
 }: InsertRefBookPanelProps) => {
-  const refBookOptions = bookOptions.length > 0 ? bookOptions : FALLBACK_REF_BOOK_OPTIONS;
+  const refBookOptions = bookOptions.length > 0 ? bookOptions : (isLoadingBooks ? [] : FALLBACK_REF_BOOK_OPTIONS);
   const content = (
     <div className="scrollbar-thin flex-1 overflow-y-auto p-4">
       <div className="space-y-5">
@@ -55,7 +59,23 @@ const InsertRefBookPanel = ({
         {showPanelChrome ? <Separator /> : null}
 
         <div className="space-y-2">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Livro</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Livro</Label>
+            {onReloadBooks ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                onClick={onReloadBooks}
+                disabled={isLoadingBooks}
+                title="Recarregar livros da Bibliografia"
+              >
+                <RotateCw className={`h-3 w-3 mr-1 ${isLoadingBooks ? "animate-spin" : ""}`} />
+                Atualizar
+              </Button>
+            ) : null}
+          </div>
           <SourceRadioList
             name="insert-ref-book"
             items={refBookOptions.map((option) => ({
@@ -63,8 +83,23 @@ const InsertRefBookPanel = ({
               label: option.label,
             }))}
             selectedId={selectedRefBook}
+            isLoading={isLoadingBooks}
+            loadingLabel="Carregando livros da Bibliografia..."
+            emptyLabel="Nenhum livro disponível."
             onChange={onSelectRefBook}
           />
+          {refBookOptions.length === 0 && !isLoadingBooks && onReloadBooks ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onReloadBooks}
+              className="mt-1 h-7 text-xs"
+            >
+              <RotateCw className="h-3 w-3 mr-1.5" />
+              Tentar novamente
+            </Button>
+          ) : null}
         </div>
 
         <div className="space-y-2">

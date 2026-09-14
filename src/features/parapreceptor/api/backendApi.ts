@@ -1,4 +1,4 @@
-import type { LexicalOverviewHistoryPayload, SemanticOverviewHistoryPayload } from "@/features/parapreceptor/types";
+import type { BiblioWvBookOption, LexicalOverviewHistoryPayload, SemanticOverviewHistoryPayload } from "@/features/parapreceptor/types";
 
 export interface UploadedFileMeta {
   id: string;
@@ -195,6 +195,30 @@ export async function healthCheck(): Promise<{ ok: boolean; openaiConfigured: bo
   const res = await fetch(apiUrl("/api/health"));
   if (!res.ok) throw new Error("Backend indisponivel.");
   return res.json();
+}
+
+export async function listBiblioWvBooksApp(): Promise<{
+  ok: boolean;
+  result: {
+    books: BiblioWvBookOption[];
+  };
+}> {
+  const data = await fetchJsonWithRetry<any>(apiUrl("/api/biblio/wv/books"), {
+    method: "GET",
+    cache: "no-store",
+  });
+  const rawList: Array<{ titulo?: string; sigla?: string }> = data?.books || [];
+  const books: BiblioWvBookOption[] = rawList.map((item) => {
+    const title = String(item?.titulo || "").trim();
+    const sigla = String(item?.sigla || "").trim();
+    const id = sigla || title;
+    const label = sigla ? `${sigla} - ${title}` : title;
+    return { id, label, title, sigla };
+  });
+  return {
+    ok: Boolean(data?.ok ?? true),
+    result: { books },
+  };
 }
 
 export async function insertRefBookMacro(book: string, mode: "bee" | "simples"): Promise<{ ok: boolean; result: string }> {

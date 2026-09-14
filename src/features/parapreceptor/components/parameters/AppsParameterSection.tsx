@@ -13,12 +13,15 @@ import VerbetografiaPanel from "@/features/parapreceptor/components/parameters/V
 import { parameterSemanticMeta } from "@/features/parapreceptor/config/metadata";
 import { resolveActionItem, resolveSemanticActionId } from "@/features/parapreceptor/config/appRegistry";
 import { ALL_OVERVIEW_SOURCE_IDS } from "@/features/parapreceptor/config/overviewSources";
-import type { ActionItemId, AppPanelScope, LexicalBookOption, RefBookMode, SelectOption, SemanticActionId, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
+import type { ActionItemId, AppPanelScope, BiblioWvBookOption, LexicalBookOption, RefBookMode, SelectOption, SemanticActionId, SemanticIndexOption, SemanticSearchRagContext } from "@/features/parapreceptor/types";
 
 interface AppsParameterSectionProps {
   appId: ActionItemId | null;
   appPanelScope: AppPanelScope | null;
   selectedRefBook: string;
+  biblioWvBooks?: BiblioWvBookOption[];
+  isLoadingBiblioWvBooks?: boolean;
+  onReloadBiblioWvBooks?: () => void;
   refBookMode: RefBookMode;
   refBookPages: string;
   isRunningInsertRefBook: boolean;
@@ -50,6 +53,7 @@ interface AppsParameterSectionProps {
   selectedSemanticSearchIndexId: string;
   semanticSearchIndexes: SemanticIndexOption[];
   isLoadingSemanticSearchIndexes: boolean;
+  onReloadSemanticIndexes?: () => void;
   semanticSearchQuery: string;
   semanticSearchMaxResults: number;
   semanticMinScore: number | null;
@@ -146,6 +150,9 @@ const AppsParameterSection = ({
   appId,
   appPanelScope,
   selectedRefBook,
+  biblioWvBooks = [],
+  isLoadingBiblioWvBooks = false,
+  onReloadBiblioWvBooks,
   refBookMode,
   refBookPages,
   isRunningInsertRefBook,
@@ -177,6 +184,7 @@ const AppsParameterSection = ({
   selectedSemanticSearchIndexId,
   semanticSearchIndexes,
   isLoadingSemanticSearchIndexes,
+  onReloadSemanticIndexes,
   semanticSearchQuery,
   semanticSearchMaxResults,
   semanticMinScore,
@@ -309,7 +317,9 @@ const AppsParameterSection = ({
       <InsertRefBookPanel
         title={parameterSemanticMeta.biblio_livros.title}
         description={parameterSemanticMeta.biblio_livros.description}
-        bookOptions={lexicalBooks}
+        bookOptions={biblioWvBooks && biblioWvBooks.length > 0 ? biblioWvBooks : lexicalBooks}
+        isLoadingBooks={isLoadingBiblioWvBooks}
+        onReloadBooks={onReloadBiblioWvBooks}
         selectedRefBook={selectedRefBook}
         refBookMode={refBookMode}
         refBookPages={refBookPages}
@@ -473,6 +483,7 @@ const AppsParameterSection = ({
               selectedIndexId={selectedSemanticSearchIndexId}
               availableIndexes={semanticSearchIndexes}
               isLoadingIndexes={isLoadingSemanticSearchIndexes}
+              onReloadIndexes={onReloadSemanticIndexes}
               onSelectedIndexChange={onSelectedSemanticSearchIndexIdChange}
               query={sharedSemanticQuery}
               maxResults={sharedSemanticLimit}

@@ -1,4 +1,4 @@
-﻿import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import ParameterPanelToolbar from "@/features/parapreceptor/components/parameters/ParameterPanelToolbar";
 import AppsParameterSection from "@/features/parapreceptor/components/parameters/AppsParameterSection";
@@ -6,6 +6,8 @@ import AppsParameterSection from "@/features/parapreceptor/components/parameters
 const baseAppsProps = {
   appPanelScope: "secoes_verbete" as const,
   selectedRefBook: "EXP" as const,
+  biblioWvBooks: [],
+  isLoadingBiblioWvBooks: false,
   refBookMode: "bee" as const,
   refBookPages: "",
   isRunningInsertRefBook: false,
@@ -445,6 +447,62 @@ describe("verbetografia panels", () => {
     fireEvent.click(screen.getAllByRole("switch")[1]);
 
     expect(onSemanticExcludeLexicalDuplicatesChange).toHaveBeenCalledWith(true);
+  });
+
+  it("renders retry button when no semantic indexes are available and triggers onReloadSemanticIndexes", () => {
+    const onReloadSemanticIndexes = vi.fn();
+
+    render(
+      <AppsParameterSection
+        hasDocumentOpen={false}
+        {...baseAppsProps}
+        appId="busca_semantica"
+        appPanelScope="semantic_search"
+        semanticSearchIndexes={[]}
+        selectedSemanticSearchIndexId=""
+        onReloadSemanticIndexes={onReloadSemanticIndexes}
+      />,
+    );
+
+    expect(screen.getByText("Nenhum índice semântico disponível.")).toBeInTheDocument();
+    const retryButton = screen.getByRole("button", { name: /tentar novamente/i });
+    expect(retryButton).toBeInTheDocument();
+    fireEvent.click(retryButton);
+    expect(onReloadSemanticIndexes).toHaveBeenCalledTimes(1);
+
+    const updateButton = screen.getByRole("button", { name: /atualizar/i });
+    expect(updateButton).toBeInTheDocument();
+    fireEvent.click(updateButton);
+    expect(onReloadSemanticIndexes).toHaveBeenCalledTimes(2);
+  });
+
+  it("renders biblio_livros panel with biblioWvBooks and triggers onReloadBiblioWvBooks", () => {
+    const onReloadBiblioWvBooks = vi.fn();
+    const onSelectRefBook = vi.fn();
+
+    render(
+      <AppsParameterSection
+        hasDocumentOpen={false}
+        {...baseAppsProps}
+        appId="biblio_livros"
+        appPanelScope="bibliografia"
+        biblioWvBooks={[
+          { id: "LO2", label: "LO2 - Léxico de Ortopensatas (2ª ed.)" },
+          { id: "EXP", label: "EXP - 700 Experimentos" },
+        ]}
+        selectedRefBook="LO2"
+        onSelectRefBook={onSelectRefBook}
+        onReloadBiblioWvBooks={onReloadBiblioWvBooks}
+      />,
+    );
+
+    expect(screen.getByText("LO2 - Léxico de Ortopensatas (2ª ed.)")).toBeInTheDocument();
+    expect(screen.getByText("EXP - 700 Experimentos")).toBeInTheDocument();
+
+    const updateButton = screen.getByRole("button", { name: /atualizar/i });
+    expect(updateButton).toBeInTheDocument();
+    fireEvent.click(updateButton);
+    expect(onReloadBiblioWvBooks).toHaveBeenCalledTimes(1);
   });
 });
 

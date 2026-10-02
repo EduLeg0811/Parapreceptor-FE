@@ -809,7 +809,7 @@ const useParapreceptorApps = ({
     setIsRunningLexicalSearch(true);
     try {
       const data = await searchLexicalBookApp({ book, term, limit: maxResults, miniTextWindow: miniArlindoTextWindow });
-      const resultObj = data?.result ?? data ?? {};
+      const resultObj = data.result;
       const totalFound = Number(resultObj.total ?? (resultObj as any).totalFound ?? 0);
       const matches = ((resultObj.matches ?? (resultObj as any).results ?? []) as any[]).slice(0, maxResults);
       if (matches.length <= 0) {
@@ -842,7 +842,7 @@ const useParapreceptorApps = ({
     setIsRunningLexicalOverview(true);
     try {
       const data = await searchLexicalOverviewApp({ term, limit, miniTextWindow: miniArlindoTextWindow, sourceIds });
-      const resultObj = data?.result ?? data ?? {};
+      const resultObj = data.result;
       const totalBooks = Number(resultObj.totalBooks ?? (resultObj.groups || []).length ?? 0);
       const totalFound = Number(resultObj.totalFound ?? 0);
       const groups = resultObj.groups ?? [];
@@ -927,7 +927,7 @@ const useParapreceptorApps = ({
         excludeLexicalDuplicates: semanticExcludeLexicalDuplicates,
         vectorStoreIds
       });
-      const resultObj = data?.result ?? data ?? {};
+      const resultObj = data.result;
       const totalFound = Number(resultObj.total ?? (resultObj as any).totalFound ?? 0);
       const requestedMinScore = typeof resultObj.requestedMinScore === "number" ? resultObj.requestedMinScore : null;
       const recommendedMinScore = Number(resultObj.recommendedMinScore ?? 0);
@@ -992,7 +992,7 @@ const useParapreceptorApps = ({
         vectorStoreIds,
         sourceIds
       });
-      const resultObj = data?.result ?? data ?? {};
+      const resultObj = data.result;
       const totalIndexes = Number(resultObj.totalIndexes || 0);
       const totalFound = Number(resultObj.totalFound || 0);
       const recommendedMinScoreMin = Number(resultObj.recommendedMinScoreMin || 0);
@@ -1053,7 +1053,7 @@ const useParapreceptorApps = ({
     setIsRunningVerbeteSearch(true);
     try {
       const data = await searchVerbeteApp({ author, title, area, text, limit: maxResults });
-      const resultObj = data?.result ?? data ?? {};
+      const resultObj = data.result;
       const totalFound = Number(resultObj.total ?? (resultObj as any).totalFound ?? 0);
       const matches = ((resultObj.matches ?? (resultObj as any).results ?? []) as any[]).slice(0, maxResults);
       if (matches.length <= 0) {

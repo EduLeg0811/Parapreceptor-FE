@@ -46,7 +46,7 @@ vi.mock("@/features/parapreceptor/services/openai", () => ({
   CHAT_MODEL: "gpt-5.6-terra",
   CHAT_GPT5_VERBOSITY: "low",
   CHAT_GPT5_EFFORT: "none",
-  CHAT_MAX_OUTPUT_TOKENS: 1000,
+  CHAT_MAX_OUTPUT_TOKENS: undefined,
   CHAT_MAX_NUM_RESULTS: 5,
   CHAT_SYSTEM_PROMPT: "system",
   BIBLIO_EXTERNA_DEFAULT_SYSTEM_PROMPT: "biblio-system",

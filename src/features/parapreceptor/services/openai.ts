@@ -81,7 +81,7 @@ export const LLM_VECTOR_STORE_TRANSLATE_RAG = (import.meta.env.VITE_OPENAI_VECTO
 export const CHAT_MODEL = "gpt-5.6-terra";
 export const CHAT_GPT5_VERBOSITY: "low" | "medium" | "high" = LLM_DEFAULT_GPT5_VERBOSITY;
 export const CHAT_GPT5_EFFORT: "none" | "low" | "medium" | "high" = LLM_DEFAULT_GPT5_EFFORT;
-export const CHAT_MAX_OUTPUT_TOKENS: number | undefined = 1000;
+export const CHAT_MAX_OUTPUT_TOKENS: number | undefined = undefined;
 export const CHAT_MAX_NUM_RESULTS = 5;
 
 export interface ExecuteLLMParams {
@@ -138,7 +138,6 @@ export async function executeLLM(params: ExecuteLLMParams): Promise<ExecuteLLMRe
     messages: params.messages,
     previousResponseId: params.previousResponseId,
     systemPrompt: params.systemPrompt ?? LLM_DEFAULT_SYSTEM_PROMPT,
-    maxOutputTokens: params.maxOutputTokens,
     verbosity: params.verbosity ?? LLM_DEFAULT_GPT5_VERBOSITY,
     reasoningEffort,
     vectorMaxResults: params.vectorMaxResults ?? 5,

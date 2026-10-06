@@ -579,8 +579,7 @@ const useParapreceptorLlm = ({
     const mergedPayload: Parameters<typeof executeLLM>[0] = {
       ...payload,
       model: currentConfig.model,
-      maxOutputTokens: currentConfig.maxOutputTokens,
-      vectorMaxResults: payload.vectorMaxResults ?? currentConfig.maxNumResults,
+        vectorMaxResults: payload.vectorMaxResults ?? currentConfig.maxNumResults,
       verbosity: normalizeVerbosity(currentConfig.gpt5Verbosity),
       reasoningEffort: normalizeEffort(currentConfig.gpt5Effort),
       systemPrompt: currentConfig.systemPrompt
@@ -607,7 +606,6 @@ const useParapreceptorLlm = ({
     const mergedPayload: Parameters<typeof executeLLM>[0] = {
       ...payload,
       model: payload.model ?? currentConfig.model,
-      maxOutputTokens: payload.maxOutputTokens ?? currentConfig.maxOutputTokens,
       verbosity: payload.verbosity ?? normalizeVerbosity(currentConfig.gpt5Verbosity),
       reasoningEffort: payload.reasoningEffort ?? normalizeEffort(currentConfig.gpt5Effort)
     };

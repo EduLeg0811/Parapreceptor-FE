@@ -11,8 +11,8 @@ import type { UploadedLlmFile } from "@/features/parapreceptor/services/openai";
 interface AiAssistantConfigPanelProps {
   llmModel: string;
   onLlmModelChange: (value: string) => void;
-  llmMaxOutputTokens: number;
-  onLlmMaxOutputTokensChange: (value: number) => void;
+  llmMaxOutputTokens?: number;
+  onLlmMaxOutputTokensChange?: (value: number) => void;
   llmVerbosity: string;
   onLlmVerbosityChange: (value: string) => void;
   llmEffort: string;
@@ -86,9 +86,6 @@ const AiAssistantConfigPanel = ({
       if (llmEffort === "none" || !llmEffort) {
         onLlmEffortChange("low");
       }
-      if (llmMaxOutputTokens < 2000) {
-        onLlmMaxOutputTokensChange(2000);
-      }
     } else {
       if (llmEffort === "xhigh" || llmEffort === "max") {
         onLlmEffortChange("high");
@@ -113,16 +110,6 @@ const AiAssistantConfigPanel = ({
               </option>
             ))}
           </select>
-        </div>
-        <div className="flex items-center gap-0">
-          <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Max Tokens</Label>
-          <Input
-            type="number"
-            min="1"
-            value={llmMaxOutputTokens}
-            onChange={(e) => onLlmMaxOutputTokensChange(e.target.value ? Number(e.target.value) : 1000)}
-            className="h-7 bg-white px-2.5 !text-[10px] md:!text-[10px]"
-          />
         </div>
         <div className="flex items-center gap-0">
           <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Verbosity</Label>

@@ -450,7 +450,6 @@ const useParapreceptorApps = ({
         ? await biblioExternaApp({
           freeText,
           llmModel: biblioExternaLlmModel,
-          llmMaxOutputTokens: biblioExternaLlmMaxOutputTokens,
           llmGpt5Verbosity: biblioExternaLlmVerbosity,
           llmGpt5Effort: biblioExternaLlmEffort,
           llmSystemPrompt: biblioExternaLlmSystemPrompt.trim() || undefined
@@ -464,7 +463,6 @@ const useParapreceptorApps = ({
           identifier,
           extra,
           llmModel: biblioExternaLlmModel,
-          llmMaxOutputTokens: biblioExternaLlmMaxOutputTokens,
           llmGpt5Verbosity: biblioExternaLlmVerbosity,
           llmGpt5Effort: biblioExternaLlmEffort,
           llmSystemPrompt: biblioExternaLlmSystemPrompt.trim() || undefined

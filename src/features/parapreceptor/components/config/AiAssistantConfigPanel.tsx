@@ -59,38 +59,17 @@ const AiAssistantConfigPanel = ({
   extraContent,
   footerContent,
 }: AiAssistantConfigPanelProps) => {
-  const isGpt6 = (llmModel || "").toLowerCase().startsWith("gpt-6");
-
-  const effortOptions = useMemo(() => {
-    if (isGpt6) {
-      return [
-        { value: "low", label: "low" },
-        { value: "medium", label: "medium" },
-        { value: "high", label: "high" },
-        { value: "xhigh", label: "xhigh" },
-        { value: "max", label: "max" },
-      ];
-    }
-    return [
-      { value: "none", label: "none" },
-      { value: "low", label: "low" },
-      { value: "medium", label: "medium" },
-      { value: "high", label: "high" },
-    ];
-  }, [isGpt6]);
+  const effortOptions = useMemo(() => [
+    { value: "none", label: "none" },
+    { value: "low", label: "low" },
+    { value: "medium", label: "medium" },
+    { value: "high", label: "high" },
+    { value: "xhigh", label: "xhigh" },
+    { value: "max", label: "max" },
+  ], []);
 
   const handleModelChange = (newModel: string) => {
     onLlmModelChange(newModel);
-    const isNewGpt6 = newModel.toLowerCase().startsWith("gpt-6");
-    if (isNewGpt6) {
-      if (llmEffort === "none" || !llmEffort) {
-        onLlmEffortChange("low");
-      }
-    } else {
-      if (llmEffort === "xhigh" || llmEffort === "max") {
-        onLlmEffortChange("high");
-      }
-    }
   };
 
   return (
@@ -123,7 +102,7 @@ const AiAssistantConfigPanel = ({
         <div className="flex items-center gap-0">
           <Label className="w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Effort</Label>
           <select
-            value={llmEffort || (isGpt6 ? "low" : "none")}
+            value={llmEffort || "none"}
             onChange={(e) => onLlmEffortChange(e.target.value)}
             className="h-7 w-full rounded-md border border-input bg-white px-2.5 text-[10px] text-foreground outline-none"
           >
@@ -134,11 +113,6 @@ const AiAssistantConfigPanel = ({
             ))}
           </select>
         </div>
-        {isGpt6 ? (
-          <p className="text-[9px] text-muted-foreground pt-0.5 leading-tight">
-            GPT-6 Astra: raciocínio avançado (effort: low a max, sem nível none). Tokens incluem raciocínio interno.
-          </p>
-        ) : null}
       {showVectorStore ? (
         <div className="space-y-1.5">
           <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Vector Store</Label>

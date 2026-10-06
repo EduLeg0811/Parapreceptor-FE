@@ -43,7 +43,7 @@ vi.mock("@/features/parapreceptor/services/fileParser", () => ({
 vi.mock("@/features/parapreceptor/services/openai", () => ({
   executeLLM: vi.fn(),
   ChatMessage: class { },
-  CHAT_MODEL: "gpt-5.6-terra",
+  CHAT_MODEL: "gpt-6-luna",
   CHAT_GPT5_VERBOSITY: "low",
   CHAT_GPT5_EFFORT: "none",
   CHAT_MAX_OUTPUT_TOKENS: undefined,
@@ -790,9 +790,9 @@ describe("Index page", () => {
   });
 
   it("resets persisted config from LLM Sources after confirmation", async () => {
-    window.localStorage.setItem("llm_settings_v1", JSON.stringify({ model: "gpt-5.6-luna" }));
-    window.localStorage.setItem("ai_actions_llm_settings_v1", JSON.stringify({ model: "gpt-5.6-luna" }));
-    window.localStorage.setItem("biblio_externa_llm_settings_v1", JSON.stringify({ model: "gpt-5.6-luna" }));
+    window.localStorage.setItem("llm_settings_v1", JSON.stringify({ model: "gpt-6.1-sol" }));
+    window.localStorage.setItem("ai_actions_llm_settings_v1", JSON.stringify({ model: "gpt-6.1-sol" }));
+    window.localStorage.setItem("biblio_externa_llm_settings_v1", JSON.stringify({ model: "gpt-6.1-sol" }));
     window.localStorage.setItem("general_settings_v1", JSON.stringify({ enableHistoryNumbering: false }));
 
     renderIndex();
@@ -802,7 +802,7 @@ describe("Index page", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Yes" }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("gpt-5.6-terra")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("gpt-6-luna")).toBeInTheDocument();
     });
   });
 });

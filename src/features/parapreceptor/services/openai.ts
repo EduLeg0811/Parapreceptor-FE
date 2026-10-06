@@ -65,11 +65,11 @@ const fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Resp
 // LLM DEFAULTS (CENTRALIZADOS)
 // ============================================================
 // Modelo padrao global.
-export const LLM_DEFAULT_MODEL = "gpt-5.6-terra";
-// Parametro GPT-5.x (text.verbosity na Responses API).
+export const LLM_DEFAULT_MODEL = "gpt-6-luna";
+// Parametro GPT-5.x / GPT-6 (text.verbosity na Responses API).
 export const LLM_DEFAULT_GPT5_VERBOSITY: "low" | "medium" | "high" = "low";
-// Parametro GPT-5.x (reasoning.effort na Responses API).
-export const LLM_DEFAULT_GPT5_EFFORT: "none" | "low" | "medium" | "high" = "none";
+// Parametro GPT-5.x / GPT-6 (reasoning.effort na Responses API).
+export const LLM_DEFAULT_GPT5_EFFORT: "none" | "low" | "medium" | "high" | "xhigh" | "max" = "none";
 // Vector stores vindos de .env.
 export const LLM_VECTOR_STORES = (import.meta.env.VITE_OPENAI_VECTOR_STORES as string | undefined)?.trim() || "";
 export const LLM_VECTOR_STORE_LO = (import.meta.env.VITE_OPENAI_VECTOR_STORE_LO as string | undefined)?.trim() || "";
@@ -78,9 +78,9 @@ export const LLM_VECTOR_STORE_TRANSLATE_RAG = (import.meta.env.VITE_OPENAI_VECTO
 // ============================================================
 // CHAT DEFAULTS (AJUSTE ESPECIFICO DO CHAT)
 // ============================================================
-export const CHAT_MODEL = "gpt-5.6-terra";
+export const CHAT_MODEL = "gpt-6-luna";
 export const CHAT_GPT5_VERBOSITY: "low" | "medium" | "high" = LLM_DEFAULT_GPT5_VERBOSITY;
-export const CHAT_GPT5_EFFORT: "none" | "low" | "medium" | "high" = LLM_DEFAULT_GPT5_EFFORT;
+export const CHAT_GPT5_EFFORT: "none" | "low" | "medium" | "high" | "xhigh" | "max" = LLM_DEFAULT_GPT5_EFFORT;
 export const CHAT_MAX_OUTPUT_TOKENS: number | undefined = undefined;
 export const CHAT_MAX_NUM_RESULTS = 5;
 
@@ -124,11 +124,7 @@ export interface ExecuteLLMResult {
 
 export async function executeLLM(params: ExecuteLLMParams): Promise<ExecuteLLMResult> {
   const chosenModel = params.model ?? LLM_DEFAULT_MODEL;
-  const isGpt6 = chosenModel.toLowerCase().startsWith("gpt-6");
-  let reasoningEffort = params.reasoningEffort ?? (isGpt6 ? "low" : LLM_DEFAULT_GPT5_EFFORT);
-  if (isGpt6 && (reasoningEffort === "none" || !reasoningEffort)) {
-    reasoningEffort = "low";
-  }
+  const reasoningEffort = params.reasoningEffort ?? LLM_DEFAULT_GPT5_EFFORT;
 
   const vectorStores = params.vectorStores?.map((id) => id.trim()).filter(Boolean);
   const inputFileIds = params.inputFileIds?.map((id) => id.trim()).filter(Boolean);

@@ -11,7 +11,7 @@ describe("useParapreceptorLlmLogs", () => {
       request: { prompt: "test" },
       response: {
         meta: {
-          model: "gpt-5.6-luna",
+          model: "gpt-6-luna",
           status: "ok",
           rag_references: ["Ref A", "Ref B"],
           usage: {
@@ -35,7 +35,7 @@ describe("useParapreceptorLlmLogs", () => {
     const { result } = renderHook(() => useParapreceptorLlmLogs({
       llmLogs: [latestLog],
       llmSessionLogs: [latestLog, errorLog],
-      llmModel: "gpt-5.6-luna",
+      llmModel: "gpt-6-luna",
       llmLogFontScale: 1,
     }));
 
@@ -50,21 +50,21 @@ describe("useParapreceptorLlmLogs", () => {
     expect(result.current.outputTokens).toBe(500);
     expect(result.current.successfulCallsCount).toBe(1);
     expect(result.current.errorCallsCount).toBe(1);
-    expect(result.current.effectiveModel).toBe("gpt-5.6-luna");
+    expect(result.current.effectiveModel).toBe("gpt-6-luna");
     expect(result.current.estimatedUsd).toBeCloseTo(0.000764, 6);
     expect(result.current.estimatedBrl).toBeCloseTo(0.004202, 6);
     expect(result.current.latestEstimatedUsd).toBeCloseTo(0.000764, 6);
     expect(result.current.latestEstimatedBrl).toBeCloseTo(0.004202, 6);
   });
 
-  it("calculates estimated cost correctly for gpt-5.6 luna, terra, and sol", () => {
-    const terraLog: LlmLogEntry = {
+  it("calculates estimated cost correctly for gpt-6-luna and gpt-6.1-sol", () => {
+    const solLog: LlmLogEntry = {
       id: "1",
       at: "2026-08-05T09:00:00Z",
       request: { prompt: "test" },
       response: {
         meta: {
-          model: "gpt-5.6-terra",
+          model: "gpt-6.1-sol",
           usage: {
             input_tokens: 1_000_000,
             output_tokens: 1_000_000,
@@ -74,39 +74,13 @@ describe("useParapreceptorLlmLogs", () => {
     };
 
     const { result } = renderHook(() => useParapreceptorLlmLogs({
-      llmLogs: [terraLog],
-      llmSessionLogs: [terraLog],
-      llmModel: "gpt-5.6-terra",
+      llmLogs: [solLog],
+      llmSessionLogs: [solLog],
+      llmModel: "gpt-6.1-sol",
       llmLogFontScale: 1,
     }));
 
-    expect(result.current.latestEstimatedUsd).toBeCloseTo(14.00, 2);
-  });
-
-  it("calculates estimated cost correctly for gpt-6-astra", () => {
-    const astraLog: LlmLogEntry = {
-      id: "2",
-      at: "2026-09-14T09:00:00Z",
-      request: { prompt: "test" },
-      response: {
-        meta: {
-          model: "gpt-6-astra",
-          usage: {
-            input_tokens: 1_000_000,
-            output_tokens: 1_000_000,
-          },
-        },
-      },
-    };
-
-    const { result } = renderHook(() => useParapreceptorLlmLogs({
-      llmLogs: [astraLog],
-      llmSessionLogs: [astraLog],
-      llmModel: "gpt-6-astra",
-      llmLogFontScale: 1,
-    }));
-
-    expect(result.current.latestEstimatedUsd).toBeCloseTo(60.00, 2);
+    expect(result.current.latestEstimatedUsd).toBeCloseTo(35.00, 2);
   });
 });
 

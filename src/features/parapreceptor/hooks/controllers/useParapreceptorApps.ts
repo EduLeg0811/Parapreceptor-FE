@@ -794,7 +794,7 @@ const useParapreceptorApps = ({
   const handleRunLexicalSearch = useCallback(async () => {
     const book = selectedLexicalBook.trim();
     const term = lexicalTerm.trim();
-    const maxResults = Math.max(1, Math.min(200, lexicalMaxResults || 1));
+    const maxResults = Math.max(1, Math.min(500, lexicalMaxResults || 1));
     if (!book) {
       toast.error("Selecione um livro para a busca.");
       return;

@@ -97,7 +97,7 @@ const BookSearchPanel = ({
           <Input
             type="number"
             min={1}
-            max={100}
+            max={500}
             value={String(maxResults)}
             onChange={(e) => {
               const raw = Number.parseInt(e.target.value || "1", 10);
